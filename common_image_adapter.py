@@ -94,19 +94,8 @@ class ResidualAttentionBlock(nn.Module):
             cls_tokens = x[cls_indices, torch.arange(x.shape[1])]
             tokens = cls_tokens[None] + tokens
             tokens = tokens + self.mlp(self.ln_2(tokens))
-
-            # x = x + att                    #原始网络
-            # x = x + self.mlp(self.ln_2(x))
-            # x = x + att                       #版本1
-            # x1 = self.mlp(self.ln_2(x))
-            # x2 = self.adapter(x)
-            # x2 = 0.4 * x2 + 0.6 * x
-            # x = x + x1 + x2
-            # x = x + att                       #版本2
-            # x1 = self.mlp(self.ln_2(x))
-            # x1 = x1 + self.adapter(x1)
-            # x = x + x1
-            x = x + att                       #版本3
+            
+            x = x + att                      
             x1 = self.mlp(self.ln_2(x))
             x2 = self.adapter(x)
             x2 = self.alpha * x2 + (1-self.alpha) * x
@@ -119,26 +108,6 @@ class ResidualAttentionBlock(nn.Module):
             x = x + self.mlp(self.ln_2(x))
 
             return x, None
-
-# class CLIPAdapter(nn.Module):
-#     def __init__(self, D_features, mlp_ratio=0.25, act_layer=nn.GELU, skip_connect=True):
-#         super().__init__()
-#         self.skip_connect = skip_connect
-#         D_hidden_features = int(D_features * mlp_ratio)
-#         self.act = act_layer()
-#         self.D_fc1 = nn.Linear(D_features, D_hidden_features)
-#         self.D_fc2 = nn.Linear(D_hidden_features, D_hidden_features,)
-#
-#     def forward(self, x):
-#         # x is (BT, HW+1, D)
-#         xs = self.D_fc1(x)
-#         xs = self.act(xs)
-#         xs = self.D_fc2(xs)
-#         if self.skip_connect:
-#             x = x + xs
-#         else:
-#             x = xs
-#         return x
 
 class LayerNorm(nn.LayerNorm):
     """Subclass torch's LayerNorm to handle fp16."""
