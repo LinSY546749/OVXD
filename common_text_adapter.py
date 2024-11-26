@@ -108,13 +108,11 @@ class ResidualAttentionBlock(nn.Module):
             tokens = tokens + self.mlp(self.ln_2(tokens))
             att = self.Space_Adapter(att)
             x = x + att
-            #x = x + self.mlp(self.ln_2(x)) + self.scale * self.MLP_Adapter(x)
             x = x + self.mlp(self.ln_2(x)) + self.scale * self.MLP_Adapter(self.ln_2(x))
             return x, tokens
         else:
             assert tokens is None
             x = x + att
-            # x = x + self.attention(self.ln_1(x))
             x = x + self.mlp(self.ln_2(x))
 
             return x, None
